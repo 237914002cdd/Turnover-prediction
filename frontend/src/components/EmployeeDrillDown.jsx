@@ -149,7 +149,7 @@ const EmployeeDrillDown = ({ employeeId, onBack }) => {
           </div>
         </div>
 
-        <h3 style={{ fontSize: 13, fontWeight: 600, color: '#ccc', marginBottom: 12 }}>特征归因矩阵</h3>
+        <h3 style={{ fontSize: 13, fontWeight: 600, color: '#ccc', marginBottom: 12 }}>核心不满驱动因子矩阵</h3>
         <div style={{ overflowX: 'auto' }}>
           <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 11, minWidth: 700 }}>
             <thead>
@@ -197,7 +197,7 @@ const EmployeeDrillDown = ({ employeeId, onBack }) => {
 
         {shap_risk_factors.length > 0 && (
           <div style={{ background: 'rgba(255,255,255,0.03)', borderRadius: 10, padding: '14px 18px', border: '1px solid rgba(255,255,255,0.06)', marginTop: 16 }}>
-            <h3 style={{ fontSize: 12, fontWeight: 600, color: '#bbb', marginBottom: 8 }}>SHAP 白盒归因 (Top 3)</h3>
+            <h3 style={{ fontSize: 12, fontWeight: 600, color: '#bbb', marginBottom: 8 }}>核心不满驱动因子 (Top 3)</h3>
             {shap_risk_factors.map((f, i) => (
               <div key={f.factor_name} style={{ marginBottom: 6 }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 11, marginBottom: 2 }}>

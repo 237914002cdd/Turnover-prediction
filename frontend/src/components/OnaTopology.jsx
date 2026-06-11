@@ -404,7 +404,7 @@ const ONAPrototype = ({ onNavigateToDrillDown }) => {
           <div style={{ fontSize: 10, color: '#666', marginBottom: 6 }}>快速聚焦 · 高危枢纽</div>
           <button onClick={focusOnShen}
             style={{ width: '100%', padding: '6px 0', borderRadius: 6, border: '1px solid rgba(255,77,79,0.3)', background: 'rgba(255,77,79,0.06)', color: '#FF4D4F', fontSize: 11, cursor: 'pointer' }}>
-            🔴 聚焦 申鹏程（中心度 0.96）
+            🔴 聚焦 申鹏程（组织核心影响力 0.96）
           </button>
         </div>
 
@@ -508,8 +508,8 @@ const HoverTooltip = ({ data, position, onClose, onStartIntervention }) => {
       <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 1, margin: '0 18px', borderRadius: 8, overflow: 'hidden' }}>
         {[
           { label: '离职概率', value: `${(risk_metrics.base_turnover_probability * 100).toFixed(0)}%`, color: isRed ? '#FF4D4F' : '#FFA940' },
-          { label: '中心度', value: risk_metrics.ona_centrality_score.toFixed(2), color: '#5B8FF9' },
-          { label: '震荡指数', value: `Top ${((1 - risk_metrics.organization_shock_index) * 100).toFixed(0)}%`, color: '#FF4D4F' },
+          { label: '组织核心影响力', value: risk_metrics.ona_centrality_score.toFixed(2), color: '#5B8FF9' },
+          { label: '骨干离职辐射圈', value: `Top ${((1 - risk_metrics.organization_shock_index) * 100).toFixed(0)}%`, color: '#FF4D4F' },
         ].map((item, i) => (
           <div key={i} style={{ textAlign: 'center', padding: '10px 4px', background: 'rgba(0,0,0,0.2)' }}>
             <div style={{ fontSize: 16, fontWeight: 700, color: item.color, fontFamily: 'monospace' }}>{item.value}</div>
@@ -520,7 +520,7 @@ const HoverTooltip = ({ data, position, onClose, onStartIntervention }) => {
 
       {shap_risk_factors.length > 0 && (
         <div style={{ padding: '0 18px 12px' }}>
-          <div style={{ fontSize: 11, fontWeight: 600, color: '#999', marginBottom: 8 }}>SHAP 核心离职诱因</div>
+          <div style={{ fontSize: 11, fontWeight: 600, color: '#999', marginBottom: 8 }}>核心不满驱动因子</div>
           {shap_risk_factors.map((factor) => (
             <div key={factor.factor_name} style={{ marginBottom: 8 }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 11, marginBottom: 3 }}>
@@ -537,9 +537,12 @@ const HoverTooltip = ({ data, position, onClose, onStartIntervention }) => {
 
       {cascade_effect_prediction.direct_impact_nodes_count > 0 && (
         <div style={{ padding: '0 18px 12px' }}>
-          <div style={{ fontSize: 11, fontWeight: 600, color: '#999', marginBottom: 6 }}>多米诺级联连带风险 ⚠</div>
+          <div style={{ fontSize: 11, fontWeight: 600, color: '#999', marginBottom: 6 }}>潜在团队流失放大效应 ⚠</div>
           <div style={{ fontSize: 11, color: '#aaa' }}>
-            预计连带影响 <strong style={{ color: '#FF4D4F' }}>{cascade_effect_prediction.total_downstream_risks_count}</strong> 人，流失概率放大 <strong style={{ color: '#FF4D4F' }}>{cascade_effect_prediction.co_leaver_risk_multiplier}x</strong>
+            预计连带影响 <strong style={{ color: '#FF4D4F' }}>{cascade_effect_prediction.total_downstream_risks_count}</strong> 人
+          </div>
+          <div style={{ fontSize: 10, color: '#666', fontStyle: 'italic', marginTop: 1 }}>
+            流失概率放大 {cascade_effect_prediction.co_leaver_risk_multiplier}x · 离职将引发关联震荡
           </div>
         </div>
       )}
