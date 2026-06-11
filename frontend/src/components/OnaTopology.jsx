@@ -252,14 +252,19 @@ const ONAPrototype = ({ onNavigateToDrillDown }) => {
       setShowTooltip(false);
       setHoveredNode(null);
 
-      graph.setAutoPaint(false);
-      graph.getNodes().forEach((node) => graph.clearItemStates(node));
-      graph.getEdges().forEach((edge) => {
-        graph.clearItemStates(edge);
-        edge.update({ style: { stroke: '#2a2a3a', lineWidth: 1.5, opacity: 0.6 } });
-      });
-      graph.setAutoPaint(true);
-      graph.paint();
+      if (isFocusMode) {
+        // 焦点模式下：恢复焦点模式渲染，不清除背景淡化
+        applyFocusMode(graphRef.current, SHEN_HASH);
+      } else {
+        graph.setAutoPaint(false);
+        graph.getNodes().forEach((node) => graph.clearItemStates(node));
+        graph.getEdges().forEach((edge) => {
+          graph.clearItemStates(edge);
+          edge.update({ style: { stroke: '#2a2a3a', lineWidth: 1.5, opacity: 0.6 } });
+        });
+        graph.setAutoPaint(true);
+        graph.paint();
+      }
     });
 
     // ===== 点击 =====
