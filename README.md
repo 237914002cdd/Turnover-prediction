@@ -55,6 +55,8 @@ npm run dev -- --port 5175
 | `POST` | `/api/v1/ona/intervention/create` | 创建干预（状态机） |
 | `POST` | `/api/v1/roi/simulate` | ROI 实时模拟测算 |
 | `POST` | `/api/v1/ona/playbook/generate` | LLM 面谈剧本生成 |
+| `POST` | `/api/v1/ona/graph/upload` | CSV/Excel 批量导入员工数据 |
+| `GET` | `/api/v1/ona/report/{id}` | 导出留任建议书 PDF |
 
 ## 核心数学模型
 
