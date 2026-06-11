@@ -1,0 +1,11 @@
+﻿Age,Attrition,BusinessTravel,Department,Education,EducationField,Gender,JobLevel,JobRole,MaritalStatus,MonthlyIncome,OverTime,PercentSalaryHike,PerformanceRating,TotalWorkingYears,YearsAtCompany,YearsInCurrentRole,YearsSinceLastPromotion,离职状态,出差频率,部门,岗位,月薪,上年度绩效,是否加班,月工作时长,风险等级,绩效等级
+41,Yes,Travel_Rarely,Sales,2,Life Sciences,Female,2,Sales Executive,Single,5993,Yes,11,3,8,6,4,0,离职,中,数智营销事业部,高级销售顾问,5993,良好,True,238,HIGH,MID
+49,No,Travel_Frequently,Research & Development,1,Life Sciences,Male,2,Research Scientist,Married,5130,No,23,4,10,10,7,1,在岗,高,用友网络 - 数智人力事业部,高级算法工程师,5130,优秀,False,170,LOW,HIGH
+37,Yes,Travel_Rarely,Research & Development,2,Other,Male,1,Laboratory Technician,Single,2090,Yes,11,3,7,1,0,0,离职,中,用友网络 - 数智人力事业部,实验室技术员,2090,良好,True,214,HIGH,MID
+33,No,Travel_Frequently,Research & Development,4,Life Sciences,Female,1,Research Scientist,Married,2909,No,12,2,8,8,7,3,在岗,高,用友网络 - 数智人力事业部,高级算法工程师,2909,中等,False,157,MID,LOW
+27,No,Travel_Rarely,Research & Development,1,Medical,Male,1,Laboratory Technician,Married,3468,No,17,3,6,2,2,2,在岗,中,用友网络 - 数智人力事业部,实验室技术员,3468,良好,False,173,MID,MID
+32,No,Travel_Frequently,Sales,3,Life Sciences,Male,2,Sales Executive,Divorced,3068,Yes,17,4,9,7,7,4,在岗,高,数智营销事业部,高级销售顾问,3068,优秀,True,238,MID,HIGH
+48,Yes,Travel_Rarely,Research & Development,4,Other,Female,3,Healthcare Representative,Married,11063,No,15,5,17,12,10,7,离职,中,用友网络 - 数智人力事业部,医疗行业顾问,11063,卓越,False,171,HIGH,HIGH
+37,Yes,Travel_Rarely,Research & Development,1,Technical Degree,Male,1,Research Scientist,Married,4769,No,11,3,6,1,0,0,离职,中,用友网络 - 数智人力事业部,高级算法工程师,4769,良好,False,170,HIGH,MID
+35,No,Travel_Frequently,Research & Development,2,Medical,Male,1,Laboratory Technician,Married,4005,No,18,3,7,4,3,1,在岗,高,用友网络 - 数智人力事业部,实验室技术员,4005,良好,False,151,MID,MID
+31,No,Travel_Rarely,Sales,3,Life Sciences,Female,2,Sales Executive,Married,8707,No,14,3,7,5,4,1,在岗,中,数智营销事业部,高级销售顾问,8707,良好,False,173,LOW,MID
