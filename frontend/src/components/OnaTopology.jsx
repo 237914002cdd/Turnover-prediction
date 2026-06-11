@@ -20,6 +20,7 @@ const ONAPrototype = ({ onNavigateToDrillDown }) => {
   const [subgraphLoading, setSubgraphLoading] = useState(false);
   const [viewMode, setViewMode] = useState('global');
   const [graphLoaded, setGraphLoaded] = useState(false);
+  const [isFocusMode, setIsFocusMode] = useState(true);
   // 九宫格数据 — 统一注册表派生
   const [gridData] = useState(() =>
     Object.values(EMPLOYEE_REGISTRY).map(e => ({
@@ -178,6 +179,13 @@ const ONAPrototype = ({ onNavigateToDrillDown }) => {
           graphRef.current.data(json.data);
           graphRef.current.render();
           setGraphLoaded(true);
+
+          // 焦点聚焦模式：加载后立即执行默认聚焦
+          setTimeout(() => {
+            if (graphRef.current && !destroyedRef.current && isFocusMode) {
+              applyFocusMode(graphRef.current, SHEN_HASH);
+            }
+          }, 800);
           setTimeout(() => {
             if (graphRef.current && !destroyedRef.current) {
               graphRef.current.fitView([60, 60, 60, 60]);
@@ -301,6 +309,64 @@ const ONAPrototype = ({ onNavigateToDrillDown }) => {
 
   // 快速聚焦：申鹏程
   const focusOnShen = () => loadSubgraph(SHEN_HASH);
+
+  // 焦点聚焦模式 — 淡化非关联节点
+  const applyFocusMode = (graph, centerId) => {
+    graph.setAutoPaint(false);
+    const centerNode = graph.findById(centerId);
+    if (!centerNode) { graph.setAutoPaint(true); return; }
+
+    const neighborIds = new Set([centerId]);
+    graph.getEdges().forEach((edge) => {
+      const source = edge.getSource();
+      const target = edge.getTarget();
+      if (source === centerNode || target === centerNode) {
+        const neighbor = source === centerNode ? target : source;
+        neighborIds.add(neighbor.getModel().id);
+      }
+    });
+
+    graph.getNodes().forEach((node) => {
+      graph.clearItemStates(node);
+      if (neighborIds.has(node.getModel().id)) {
+        graph.setItemState(node, 'active', true);
+      } else {
+        graph.setItemState(node, 'inactive', true);
+      }
+    });
+    graph.getEdges().forEach((edge) => {
+      graph.clearItemStates(edge);
+      const src = edge.getSource();
+      const tgt = edge.getTarget();
+      if (src === centerNode || tgt === centerNode) {
+        graph.setItemState(edge, 'active', true);
+      } else {
+        graph.setItemState(edge, 'inactive', true);
+      }
+    });
+    graph.setAutoPaint(true);
+    graph.paint();
+  };
+
+  const toggleFocusMode = () => {
+    if (!graphRef.current || destroyedRef.current) return;
+    if (isFocusMode) {
+      // 退出焦点模式 → 恢复全部
+      setIsFocusMode(false);
+      graphRef.current.setAutoPaint(false);
+      graphRef.current.getNodes().forEach((node) => graphRef.current.clearItemStates(node));
+      graphRef.current.getEdges().forEach((edge) => {
+        graphRef.current.clearItemStates(edge);
+        edge.update({ style: { stroke: '#2a2a3a', lineWidth: 1.5, opacity: 0.6 } });
+      });
+      graphRef.current.setAutoPaint(true);
+      graphRef.current.paint();
+    } else {
+      // 进入焦点模式
+      setIsFocusMode(true);
+      applyFocusMode(graphRef.current, SHEN_HASH);
+    }
+  };
 
   return (
     <div style={{ width: '100vw', height: '100vh', position: 'relative', overflow: 'hidden', background: '#0f0f1a' }}>
@@ -441,8 +507,24 @@ const ONAPrototype = ({ onNavigateToDrillDown }) => {
         <div style={{ marginTop: 10, paddingTop: 10, borderTop: '1px solid rgba(255,255,255,0.06)', fontSize: 11, color: '#666', lineHeight: 1.6 }}>
           🖱 悬停节点查看详情<br />
           🔍 滚轮缩放 · 缩放{'{<}'}0.6 自动隐藏标签<br />
-          {viewMode === 'ego' ? '📌 子图模式 (≤50节点)' : '🌐 全局模式'}
+          {viewMode === 'ego' ? '📌 子图模式 (≤50节点)' : isFocusMode ? '🔍 焦点聚焦模式' : '🌐 全量组织网络视图'}
         </div>
+      </div>
+
+      {/* 焦点模式切换按钮（画布右下角） */}
+      <div style={{
+        position: 'absolute', bottom: 50, right: 20, zIndex: 10,
+        display: 'flex', gap: 6, alignItems: 'center',
+      }}>
+        <button onClick={toggleFocusMode}
+          style={{
+            padding: '6px 14px', borderRadius: 6, border: '1px solid rgba(255,255,255,0.12)',
+            background: isFocusMode ? 'rgba(255,77,79,0.15)' : 'rgba(255,255,255,0.04)',
+            color: isFocusMode ? '#FF4D4F' : '#888',
+            fontSize: 11, cursor: 'pointer', letterSpacing: 0.5,
+          }}>
+          {isFocusMode ? '🔍 焦点聚焦模式' : '🌐 全量组织网络视图'}
+        </button>
       </div>
 
       {/* G6 画布 */}
