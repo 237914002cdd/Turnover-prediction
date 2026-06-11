@@ -256,6 +256,24 @@ class SubgraphResponse(BaseModel):
 
 
 # =============================================================================
+# 数据导入
+# =============================================================================
+class ImportResult(BaseModel):
+    """导入结果"""
+    total_rows: int = Field(..., description="CSV 总行数")
+    inserted_rows: int = Field(..., description="成功插入行数")
+    skipped_rows: int = Field(..., description="跳过行数（重复/无效）")
+    errors: list[str] = Field(default_factory=list, description="错误明细列表")
+
+
+class OnaImportResponse(BaseModel):
+    """导入响应"""
+    code: int = 200
+    message: str = "Success"
+    data: ImportResult
+
+
+# =============================================================================
 # 39 字段员工档案 + 归因诊断
 # =============================================================================
 class EmployeeExtendedProfile(BaseModel):

@@ -1,9 +1,9 @@
 import React, { useEffect, useRef, useState, useCallback } from 'react';
 import G6 from '@antv/g6';
 import { debounce } from 'lodash';
-import { fetchOnaNodeDetails, fetchSubgraph } from '../api/ona';
+import { fetchOnaNodeDetails, fetchSubgraph, uploadCsv } from '../api/ona';
 import { riskLevelColor } from '../mock/mockData';
-import { buildSubgraphMock } from '../mock/subgraphMock';
+import DataUploadModal from './DataUploadModal.jsx';
 import { EMPLOYEE_REGISTRY, SHEN_HASH, LIXIA_HASH } from '../mock/employeeRegistry';
 
 const ONAPrototype = ({ onNavigateToDrillDown }) => {
@@ -21,6 +21,7 @@ const ONAPrototype = ({ onNavigateToDrillDown }) => {
   const [viewMode, setViewMode] = useState('global');
   const [graphLoaded, setGraphLoaded] = useState(false);
   const [isFocusMode, setIsFocusMode] = useState(true);
+  const [showUploadModal, setShowUploadModal] = useState(false);
   // 九宫格数据 — 统一注册表派生
   const [gridData] = useState(() =>
     Object.values(EMPLOYEE_REGISTRY).map(e => ({
@@ -479,6 +480,15 @@ const ONAPrototype = ({ onNavigateToDrillDown }) => {
           </button>
         </div>
 
+        {/* 数据导入 */}
+        <div style={{ marginTop: 10 }}>
+          <div style={{ fontSize: 10, color: '#666', marginBottom: 6 }}>数据管理</div>
+          <button onClick={() => setShowUploadModal(true)}
+            style={{ width: '100%', padding: '6px 0', borderRadius: 6, border: '1px solid rgba(24,144,255,0.3)', background: 'rgba(24,144,255,0.06)', color: '#1890FF', fontSize: 11, cursor: 'pointer' }}>
+            📤 批量导入员工数据 (CSV/Excel)
+          </button>
+        </div>
+
         {/* 风险筛选 */}
         <div style={{ marginTop: 10 }}>
           <div style={{ fontSize: 11, color: '#888', marginBottom: 6 }}>风险等级筛选</div>
@@ -560,6 +570,11 @@ const ONAPrototype = ({ onNavigateToDrillDown }) => {
       <div style={{ position: 'absolute', bottom: 16, right: 20, zIndex: 5, fontSize: 10, color: 'rgba(255,255,255,0.06)', letterSpacing: 1, userSelect: 'none', pointerEvents: 'none' }}>
         员工离职风险预测与管理平台 · PRD V4.0
       </div>
+
+      {/* 数据上传弹窗 */}
+      {showUploadModal && (
+        <DataUploadModal onClose={() => setShowUploadModal(false)} />
+      )}
     </div>
   );
 };

@@ -4,7 +4,7 @@
 
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from api.routers import ona_hover, roi_simulate, playbook, subgraph, diagnostic
+from api.routers import ona_hover, roi_simulate, playbook, subgraph, diagnostic, ona_import, report
 
 app = FastAPI(
     title="员工离职风险预测与管理平台 API",
@@ -25,6 +25,8 @@ app.include_router(roi_simulate.router)
 app.include_router(playbook.router)
 app.include_router(subgraph.router)
 app.include_router(diagnostic.router)
+app.include_router(ona_import.router)
+app.include_router(report.router)
 
 
 @app.get("/health", tags=["系统"])
@@ -48,6 +50,9 @@ async def root():
             "POST /api/v1/roi/simulate",
             "POST /api/v1/ona/playbook/generate",
             "GET  /api/v1/ona/graph/subgraph",
+            "GET  /api/v1/ona/graph/topology",
             "GET  /api/v1/employee/diagnostic/{id}",
+            "POST /api/v1/ona/graph/upload",
+            "GET  /api/v1/ona/report/{id}",
         ],
     }

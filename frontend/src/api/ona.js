@@ -60,4 +60,15 @@ export async function fetchDiagnostic(employeeIdHash) {
   return resp.data;
 }
 
+/** 上传 CSV/Excel 批量导入员工数据 */
+export async function uploadCsv(file) {
+  const formData = new FormData();
+  formData.append('file', file);
+  const resp = await fetch('http://localhost:8000/api/v1/ona/graph/upload', {
+    method: 'POST',
+    body: formData,
+  });
+  return resp.json();
+}
+
 export default api;
