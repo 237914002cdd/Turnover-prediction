@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useMemo, useCallback, useRef } from 'react';
 import { fetchOnaNodeDetails, createIntervention, simulateRoi, fetchPlaybook, fetchDiagnostic, fetchSubgraph } from '../api/ona';
 import { riskLevelColor } from '../mock/mockData';
-import { buildSubgraphMock } from '../mock/subgraphMock';
+import { EMPLOYEE_REGISTRY } from '../mock/employeeRegistry';
 import { debounce } from 'lodash';
 
 const LoadingScreen = () => (
@@ -43,13 +43,21 @@ const EmployeeDrillDown = ({ employeeId, onBack }) => {
     ]).then(([onaResp, diagResp]) => {
       if (onaResp?.code === 200) setData(onaResp.data);
       if (diagResp?.code === 200) setDiagnosticData(diagResp.data);
+      else if (onaResp?.data) {
+        // Fallback: if diagnostic fails (e.g. generic hash), build minimal display from hover data
+        setDiagnosticData({
+          employee_info: onaResp.data.node_info,
+          attribution_factors: onaResp.data.shap_risk_factors || [],
+        });
+      }
       setLoading(false);
     });
   }, [employeeId]);
 
-  const currentSalary = 13000;
-  const replacementCost = useMemo(() => data?.risk_metrics?.total_replacement_cost_cny || 25000, [data]);
-  const baseProb = useMemo(() => data?.risk_metrics?.base_turnover_probability || 0, [data]);
+  const empReg = EMPLOYEE_REGISTRY[employeeId];
+  const currentSalary = empReg?.monthlyIncome || 13000;
+  const replacementCost = useMemo(() => data?.risk_metrics?.total_replacement_cost_cny || (empReg ? empReg.monthlyIncome * 2 : 25000), [data, empReg]);
+  const baseProb = useMemo(() => data?.risk_metrics?.base_turnover_probability || empReg?.originalRisk || 0, [data, empReg]);
 
   const debouncedSimulate = useCallback(
     debounce(async (empId, pct) => {
@@ -120,7 +128,7 @@ const EmployeeDrillDown = ({ employeeId, onBack }) => {
         <div style={{ background: 'rgba(255,255,255,0.03)', borderRadius: 10, padding: '16px 20px', border: '1px solid rgba(255,255,255,0.06)', marginBottom: 20 }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
             <div>
-              <div style={{ fontSize: 16, fontWeight: 600, color: '#f0f0f0' }}>{node_info.display_alias}</div>
+              <div style={{ fontSize: 16, fontWeight: 600, color: '#f0f0f0' }}>{diagnosticData?.employee_info?.display_alias || node_info.display_alias}</div>
               <div style={{ fontSize: 12, color: '#777', marginTop: 2 }}>
                 {diagnosticData?.employee_info?.age ?? '-'}岁 · {node_info.department}{node_info.job_level ? ` · ${node_info.job_level}` : ''}{node_info.tenure_years ? ` · 司龄${node_info.tenure_years}年` : ''}
                 {diagnosticData?.employee_info?.education ? ` · ${diagnosticData.employee_info.education}` : ''}

@@ -10,8 +10,14 @@ from api.models.ona_models import (
     SubgraphResponse, SubgraphData, SubgraphNode, SubgraphEdge,
 )
 from api.services.db import get_neighbors
+from api.services.interpretation import get_anchor_display_name
 
 router = APIRouter(prefix="/api/v1/ona", tags=["ONA 拓扑交互"])
+
+
+def _node_label(n: dict) -> str:
+    anchor = get_anchor_display_name(n.get("employee_id_hash", ""))
+    return anchor if anchor else n.get("job_role_cn", "未知")
 
 
 @router.get(
@@ -35,7 +41,7 @@ async def get_subgraph(
         fill = "#FF4D4F" if risk == "HIGH" else "#FA8C16" if risk == "MID" else "#5B8FF9"
         node_models.append(SubgraphNode(
             id=n["employee_id_hash"],
-            label=n.get("job_role_cn", "未知"),
+            label=_node_label(n),
             size=max(20, int(ec * 50)),
             style={"fill": fill, "stroke": fill, "lineWidth": 2},
             description=f"{n.get('department_cn','')} · 中心度{ec:.2f}",
@@ -69,7 +75,7 @@ async def get_topology():
         fill = "#FF4D4F" if risk == "HIGH" else "#FA8C16" if risk == "MID" else "#5B8FF9"
         node_models.append(SubgraphNode(
             id=h["employee_id_hash"],
-            label=h.get("job_role_cn", "未知"),
+            label=_node_label(h),
             size=max(20, int(ec * 50)),
             style={"fill": fill, "stroke": fill, "lineWidth": 2},
             description=f"{h.get('department_cn','')} · {h.get('performance_cn','')}",

@@ -10,13 +10,15 @@ from api.models.ona_models import (
     PlaybookGenerateRequest, PlaybookGenerateResponse, PlaybookData,
 )
 from api.services.db import find_employee
+from api.services.interpretation import interpret_employee
 
 router = APIRouter(prefix="/api/v1/ona", tags=["ONA 拓扑交互"])
 
 
 def _generate_playbook(row: dict) -> str:
+    alias, tag, narrative = interpret_employee(row)
     ec = float(row.get("ona_eigenvector_centrality", 0))
-    role = row.get("job_role_cn", "员工")
+    role = alias or row.get("job_role_cn", "员工")
     dept = row.get("department_cn", "")
     salary = float(row.get("monthly_income", 0))
     hike = float(row.get("percent_salary_hike", 0))

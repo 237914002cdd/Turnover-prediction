@@ -262,6 +262,8 @@ class EmployeeExtendedProfile(BaseModel):
     """39 字段宽表映射的员工完整档案（用于诊断页展示）"""
     employee_id_hash: str
     display_alias: str
+    management_tag: Optional[str] = Field(None, description="管理标签，如'核心高危钻石'")
+    insight_narrative: Optional[str] = Field(None, description="管理洞察叙事")
     # == 个人属性 ==
     age: int = Field(..., ge=18, le=100, description="年龄")
     gender: str = Field(..., pattern="^(男|女)$", description="性别")

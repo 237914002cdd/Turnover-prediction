@@ -4,6 +4,7 @@ import { debounce } from 'lodash';
 import { fetchOnaNodeDetails, fetchSubgraph } from '../api/ona';
 import { riskLevelColor } from '../mock/mockData';
 import { buildSubgraphMock } from '../mock/subgraphMock';
+import { EMPLOYEE_REGISTRY, SHEN_HASH, LIXIA_HASH } from '../mock/employeeRegistry';
 
 const ONAPrototype = ({ onNavigateToDrillDown }) => {
   const containerRef = useRef(null);
@@ -13,17 +14,32 @@ const ONAPrototype = ({ onNavigateToDrillDown }) => {
   const [tooltipPos, setTooltipPos] = useState({ x: 0, y: 0 });
   const [showTooltip, setShowTooltip] = useState(false);
   const [hoveredNode, setHoveredNode] = useState(null);
-  const [totalLoss] = useState(284500);
+  const [totalLoss, setTotalLoss] = useState(284500);
   const [filterLevel, setFilterLevel] = useState('all');
   const [searchValue, setSearchValue] = useState('');
   const [subgraphLoading, setSubgraphLoading] = useState(false);
   const [viewMode, setViewMode] = useState('global');
   const [graphLoaded, setGraphLoaded] = useState(false);
-  // 九宫格候选数据（mock）
-  const gridData = [
-    { label: '申鹏程', risk: 'HIGH', perf: 4.5, dept: '架构组' },
-  ];
-  const redCount = 1, orangeCount = 2, totalEmployees = 12;
+  // 九宫格数据 — 统一注册表派生
+  const [gridData] = useState(() =>
+    Object.values(EMPLOYEE_REGISTRY).map(e => ({
+      label: e.name,
+      riskLevel: e.riskLevel,
+      perf: e.performanceScore,
+      dept: e.department,
+    }))
+  );
+
+  // 响应式统计 — 从 EMPLOYEE_REGISTRY 推导
+  const [stats, setStats] = useState(() => {
+    const entries = Object.values(EMPLOYEE_REGISTRY);
+    const redCount = entries.filter(e => e.riskLevel === 'HIGH').length;
+    const orangeCount = entries.filter(e => e.riskLevel === 'MID').length;
+    const loss = entries.reduce((sum, e) => sum + Math.round(e.originalRisk * e.monthlyIncome * 6), 0);
+    return { redCount, orangeCount, totalEmployees: entries.length, totalLoss: loss };
+  });
+
+  const { redCount, orangeCount, totalEmployees } = stats;
 
   // 防抖悬停请求
   const fetchNodeDetailsWithDelay = useCallback(
@@ -271,10 +287,8 @@ const ONAPrototype = ({ onNavigateToDrillDown }) => {
     if (!val) return;
     // 直接用 id 或 label 前缀
     const allIds = [
-      'e10adc3949ba59abbe56e057f20f883e',
-      'c4ca4238a0b923820dcc509a6f75849b',
-      'c81e728d9d4c2f636f067f89cc14862c',
-      'eccbc87e4b5ce2fe28308fd9f2a7baf3',
+      SHEN_HASH,
+      LIXIA_HASH,
     ];
     // 按 ID 或 标签匹配
     const matched = allIds.find(id => id.startsWith(val) || id.includes(val));
@@ -286,7 +300,7 @@ const ONAPrototype = ({ onNavigateToDrillDown }) => {
   };
 
   // 快速聚焦：申鹏程
-  const focusOnShen = () => loadSubgraph('e10adc3949ba59abbe56e057f20f883e');
+  const focusOnShen = () => loadSubgraph(SHEN_HASH);
 
   return (
     <div style={{ width: '100vw', height: '100vh', position: 'relative', overflow: 'hidden', background: '#0f0f1a' }}>
@@ -300,16 +314,16 @@ const ONAPrototype = ({ onNavigateToDrillDown }) => {
         <div style={{ textAlign: 'center' }}>
           <div style={{ fontSize: 10, color: '#888', letterSpacing: 2, textTransform: 'uppercase', marginBottom: 2 }}>高风险人才总期望替换损失</div>
           <div style={{ fontSize: 34, fontWeight: 800, color: '#FF4D4F', fontFamily: 'monospace', letterSpacing: 1, textShadow: '0 0 30px rgba(255,77,79,0.3)' }}>
-            ¥{totalLoss.toLocaleString()}
+            ¥{stats.totalLoss.toLocaleString()}
           </div>
         </div>
         <div style={{ width: 1, height: 36, background: 'rgba(255,255,255,0.08)' }} />
         <div style={{ textAlign: 'center' }}>
           <div style={{ fontSize: 10, color: '#888', letterSpacing: 2, textTransform: 'uppercase', marginBottom: 4 }}>预警概览</div>
           <div style={{ display: 'flex', gap: 16, fontSize: 12 }}>
-            <span><span style={{ color: '#FF4D4F', fontWeight: 700 }}>{redCount}</span> <span style={{ color: '#666' }}>高危</span></span>
-            <span><span style={{ color: '#FA8C16', fontWeight: 700 }}>{orangeCount}</span> <span style={{ color: '#666' }}>中危</span></span>
-            <span><span style={{ color: '#888', fontWeight: 700 }}>{totalEmployees}</span> <span style={{ color: '#666' }}>全员</span></span>
+            <span><span style={{ color: '#FF4D4F', fontWeight: 700 }}>{stats.redCount}</span> <span style={{ color: '#666' }}>高危</span></span>
+            <span><span style={{ color: '#FA8C16', fontWeight: 700 }}>{stats.orangeCount}</span> <span style={{ color: '#666' }}>中危</span></span>
+            <span><span style={{ color: '#888', fontWeight: 700 }}>{stats.totalEmployees}</span> <span style={{ color: '#666' }}>全员</span></span>
           </div>
         </div>
         <div style={{ width: 1, height: 36, background: 'rgba(255,255,255,0.08)' }} />
@@ -320,12 +334,12 @@ const ONAPrototype = ({ onNavigateToDrillDown }) => {
               <div key={ri} style={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
                 {['高', '中', '低'].map((p, pi) => {
                   const matched = gridData.find(g => {
-                    const rIdx = g.risk === 'HIGH' ? 2 : g.risk === 'MID' ? 1 : 0;
+                    const rIdx = g.riskLevel === 'HIGH' ? 2 : g.riskLevel === 'MID' ? 1 : 0;
                     const pIdx = g.perf >= 4.2 ? 0 : g.perf >= 3.8 ? 1 : 2;
                     return rIdx === ri && pIdx === pi;
                   });
                   const bg = !matched ? 'rgba(255,255,255,0.03)' :
-                    matched.risk === 'HIGH' ? 'rgba(255,77,79,0.25)' :
+                    matched.riskLevel === 'HIGH' ? 'rgba(255,77,79,0.25)' :
                     'rgba(250,140,22,0.15)';
                   return (
                     <div key={`${ri}-${pi}`} style={{

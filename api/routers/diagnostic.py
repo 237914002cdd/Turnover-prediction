@@ -11,6 +11,7 @@ from api.models.ona_models import (
     AttributionFactor, RiskLevel,
 )
 from api.services.db import find_employee
+from api.services.interpretation import interpret_employee
 import numpy as np
 
 router = APIRouter(prefix="/api/v1/employee", tags=["员工诊断"])
@@ -26,9 +27,14 @@ def _row_to_profile(row: dict) -> EmployeeExtendedProfile:
            RiskLevel.ORANGE if row.get("risk_level") == "MID" else \
            RiskLevel.YELLOW
 
+    # 业务翻译层
+    alias, tag, narrative = interpret_employee(row)
+
     return EmployeeExtendedProfile(
         employee_id_hash=row.get("employee_id_hash", ""),
-        display_alias=f"员工-{row.get('job_role_cn', '未知')}",
+        display_alias=alias,
+        management_tag=tag,
+        insight_narrative=narrative,
         age=row.get("age", 0),
         gender="男" if row.get("gender") == "Male" else "女",
         marital_status="已婚" if row.get("marital_status") == "Married" else "未婚",

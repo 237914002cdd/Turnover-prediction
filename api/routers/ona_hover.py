@@ -14,6 +14,7 @@ from api.models.ona_models import (
     InterventionCreateRequest, InterventionCreateResponse, InterventionCreateData,
 )
 from api.services.db import find_employee, get_neighbors
+from api.services.interpretation import interpret_employee
 from datetime import datetime, timedelta, timezone
 from typing import Optional
 import hashlib
@@ -51,6 +52,7 @@ async def hover_details(
 
     ec = float(row.get("ona_eigenvector_centrality", 0))
     risk = _risk_level(row.get("risk_level", "LOW"))
+    alias, tag, narrative = interpret_employee(row)
 
     # 邻接节点（用于级联预测）
     neighbors, _ = get_neighbors(body.employee_id_hash, depth=1)
@@ -68,7 +70,7 @@ async def hover_details(
     data = ONAHoverData(
         node_info=NodeInfo(
             employee_id_hash=body.employee_id_hash,
-            display_alias=f"{row.get('department_cn','')} · {row.get('job_role_cn','')}",
+            display_alias=alias,
             department=row.get("department_cn", ""),
             job_level=f"P{row.get('job_level',1)}",
             tenure_years=float(row.get("years_at_company", 0)),
