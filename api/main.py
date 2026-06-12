@@ -9,7 +9,7 @@ from api.routers import ona_hover, roi_simulate, playbook, subgraph, diagnostic,
 app = FastAPI(
     title="员工离职风险预测与管理平台 API",
     description="Master PRD V4.0 — ROI 留任决策引擎 + ONA 拓扑交互",
-    version="0.2.0",
+    version="0.3.0",
 )
 
 app.add_middleware(
@@ -42,7 +42,7 @@ async def health_check():
 async def root():
     return {
         "service": "员工离职风险预测与管理平台 API",
-        "version": "0.2.0",
+        "version": "0.3.0",
         "endpoints": [
             "GET  /health",
             "POST /api/v1/ona/node/hover_details",
