@@ -6,8 +6,12 @@
  */
 import axios from 'axios';
 
+const API_BASE = window.location.hostname === 'localhost'
+  ? 'http://localhost:8000'
+  : `http://${window.location.hostname}:8000`;
+
 const api = axios.create({
-  baseURL: 'http://localhost:8000',
+  baseURL: API_BASE,
   timeout: 10000,
   headers: { 'Content-Type': 'application/json' },
 });
@@ -64,7 +68,7 @@ export async function fetchDiagnostic(employeeIdHash) {
 export async function uploadCsv(file) {
   const formData = new FormData();
   formData.append('file', file);
-  const resp = await fetch('http://localhost:8000/api/v1/ona/graph/upload', {
+  const resp = await fetch(`${API_BASE}/api/v1/ona/graph/upload`, {
     method: 'POST',
     body: formData,
   });

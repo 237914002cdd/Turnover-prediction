@@ -332,7 +332,7 @@ const EmployeeDrillDown = ({ employeeId, onBack }) => {
             </div>
           )}
           {/* PDF 导出按钮 */}
-          <button onClick={() => window.open(`http://localhost:8000/api/v1/ona/report/${employeeId}`, '_blank')}
+          <button onClick={() => window.open(`${window.location.hostname === 'localhost' ? 'http://localhost:8000' : `http://${window.location.hostname}:8000`}/api/v1/ona/report/${employeeId}`, '_blank')}
             style={{ width: '100%', marginTop: 12, padding: '10px 0', borderRadius: 8, fontSize: 12, fontWeight: 600, cursor: 'pointer',
               border: '1px solid rgba(255,255,255,0.1)', background: 'rgba(255,255,255,0.04)', color: '#aaa' }}>
             📄 导出留任建议书 (PDF)
