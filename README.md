@@ -86,9 +86,10 @@ turnover-prediction/
 │   ├── 001_ddl_schema.sql
 │   ├── 002_intervention_state_machine.sql
 │   └── 003_performance_indices.sql
-├── docs/                     # 文档（10 份 · 1,379 行）
-│   ├── product/              # 产品文档（CHO 演示脚本 + 路线图）
+├── docs/                     # 文档（11 份 · 1,611 行）
+│   ├── product/              # 产品文档（3 份）
 │   │   ├── cho_demo_script.md       # CHO 演示脚本
+│   │   ├── competitive_analysis.md # 竞品分析报告
 │   │   └── product_roadmap.md       # 产品路线图
 │   ├── product_business_logic_whitepaper.md   # 算法白皮书
 │   ├── data_pipeline_and_dictionary_spec.md   # 数据字典
