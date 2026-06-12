@@ -68,7 +68,7 @@ npm run dev -- --port 5175
 
 ```
 turnover-prediction/
-├── api/                     # FastAPI 后端（5 routers, 8 endpoints）
+├── api/                     # FastAPI 后端（6 routers, 10 endpoints）
 │   ├── routers/             # diagnostic, onahover, playbook, roi, subgraph
 │   ├── models/ona_models.py # Pydantic 数据模型（含业务翻译层字段）
 │   ├── services/            # db.py（SQLite 连接）+ interpretation.py（业务翻译）
@@ -86,8 +86,8 @@ turnover-prediction/
 │   ├── 001_ddl_schema.sql
 │   ├── 002_intervention_state_machine.sql
 │   └── 003_performance_indices.sql
-├── docs/                     # 文档（10 份）
-│   ├── product/              # 产品文档
+├── docs/                     # 文档（10 份 · 1,379 行）
+│   ├── product/              # 产品文档（CHO 演示脚本 + 路线图）
 │   │   ├── cho_demo_script.md       # CHO 演示脚本
 │   │   └── product_roadmap.md       # 产品路线图
 │   ├── product_business_logic_whitepaper.md   # 算法白皮书
