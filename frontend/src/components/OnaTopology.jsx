@@ -5,16 +5,21 @@ import { fetchOnaNodeDetails, fetchSubgraph, uploadCsv } from '../api/ona';
 import { riskLevelColor } from '../mock/mockData';
 import DataUploadModal from './DataUploadModal.jsx';
 import { EMPLOYEE_REGISTRY, SHEN_HASH, LIXIA_HASH } from '../mock/employeeRegistry';
+import { buildSubgraphMock } from '../mock/subgraphMock';
+
+const API_BASE = window.location.hostname === 'localhost'
+  ? 'http://localhost:8000'
+  : `http://${window.location.hostname}:8000`;
 
 const ONAPrototype = ({ onNavigateToDrillDown }) => {
   const containerRef = useRef(null);
   const graphRef = useRef(null);
   const destroyedRef = useRef(false);
+  const isFocusModeRef = useRef(true);
   const [tooltipData, setTooltipData] = useState(null);
   const [tooltipPos, setTooltipPos] = useState({ x: 0, y: 0 });
   const [showTooltip, setShowTooltip] = useState(false);
   const [hoveredNode, setHoveredNode] = useState(null);
-  const [totalLoss, setTotalLoss] = useState(284500);
   const [filterLevel, setFilterLevel] = useState('all');
   const [searchValue, setSearchValue] = useState('');
   const [subgraphLoading, setSubgraphLoading] = useState(false);
@@ -32,7 +37,7 @@ const ONAPrototype = ({ onNavigateToDrillDown }) => {
     }))
   );
 
-  // 响应式统计 — 从 EMPLOYEE_REGISTRY 推导
+  // 响应式统计 — 初始从 EMPLOYEE_REGISTRY 推导，随后由拓扑数据覆盖
   const [stats, setStats] = useState(() => {
     const entries = Object.values(EMPLOYEE_REGISTRY);
     const redCount = entries.filter(e => e.riskLevel === 'HIGH').length;
@@ -89,7 +94,7 @@ const ONAPrototype = ({ onNavigateToDrillDown }) => {
     setViewMode('global');
     if (!graphRef.current || destroyedRef.current) return;
     try {
-      const resp = await fetch('/api/v1/ona/graph/topology');
+      const resp = await fetch(`${API_BASE}/api/v1/ona/graph/topology`);
       const data = await resp.json();
       if (data?.data) {
         graphRef.current.changeData(data.data);
@@ -100,9 +105,11 @@ const ONAPrototype = ({ onNavigateToDrillDown }) => {
         }, 100);
       }
     } catch {
-      // fallback
+      console.warn('返回全局失败，尝试重新加载');
     }
   }, []);
+
+  const LAYOUT_STORAGE_KEY = 'ona_layout_cache';
 
   useEffect(() => {
     if (graphRef.current || !containerRef.current) return;
@@ -120,7 +127,7 @@ const ONAPrototype = ({ onNavigateToDrillDown }) => {
       fitView: true,
       fitViewPadding: [60, 60, 60, 60],
       animate: true,
-      enabledStack: false,           // 关闭历史操作栈，释放高频交互内存
+      enabledStack: false,
       modes: {
         default: ['drag-canvas', 'zoom-canvas', 'drag-node'],
       },
@@ -133,7 +140,7 @@ const ONAPrototype = ({ onNavigateToDrillDown }) => {
         nodeStrength: 500,
         gravity: 5,
         damping: 0.8,
-        minMovementChange: 0.1,     // 提高收敛阈值，阻止海量节点微幅震荡
+        minMovementChange: 0.1,
       },
       defaultNode: {
         size: 28,
@@ -170,16 +177,42 @@ const ONAPrototype = ({ onNavigateToDrillDown }) => {
 
     graphRef.current = graph;
 
-    // 异步加载真实拓扑数据 — 等 G6 完成布局计算后再注入数据
+    // 尝试恢复已缓存的布局位置
+    let cachedPositions = null;
+    try {
+      const raw = sessionStorage.getItem(LAYOUT_STORAGE_KEY);
+      if (raw) cachedPositions = JSON.parse(raw);
+    } catch {}
+
+    // 异步加载真实拓扑数据
     setTimeout(async () => {
       try {
         if (destroyedRef.current || !graphRef.current) return;
-        const resp = await fetch('http://localhost:8000/api/v1/ona/graph/topology');
+        const resp = await fetch(`${API_BASE}/api/v1/ona/graph/topology`);
         const json = await resp.json();
         if (json?.data?.nodes && !destroyedRef.current) {
+          // 若缓存中有位置数据，覆盖到节点上
+          if (cachedPositions) {
+            json.data.nodes.forEach(n => {
+              const pos = cachedPositions[n.id];
+              if (pos) { n.x = pos.x; n.y = pos.y; }
+            });
+          }
           graphRef.current.data(json.data);
           graphRef.current.render();
           setGraphLoaded(true);
+
+          // 布局收敛后缓存所有节点位置
+          const timer = setTimeout(() => {
+            if (graphRef.current && !destroyedRef.current) {
+              const positions = {};
+              graphRef.current.getNodes().forEach(node => {
+                const m = node.getModel();
+                positions[m.id] = { x: m.x, y: m.y };
+              });
+              try { sessionStorage.setItem(LAYOUT_STORAGE_KEY, JSON.stringify(positions)); } catch {}
+            }
+          }, 5000);
 
           // 焦点聚焦模式：加载后立即执行默认聚焦
           setTimeout(() => {
@@ -192,6 +225,11 @@ const ONAPrototype = ({ onNavigateToDrillDown }) => {
               graphRef.current.fitView([60, 60, 60, 60]);
             }
           }, 600);
+          // 从后端拓扑数据解析真实统计
+          const nodes = json.data.nodes || [];
+          const redCount = nodes.filter(n => n.style?.fill === '#FF4D4F').length;
+          const orangeCount = nodes.filter(n => n.style?.fill === '#FA8C16').length;
+          setStats({ redCount, orangeCount, totalEmployees: nodes.length, totalLoss: stats.totalLoss });
           return;
         }
       } catch (err) {
@@ -253,7 +291,8 @@ const ONAPrototype = ({ onNavigateToDrillDown }) => {
       setShowTooltip(false);
       setHoveredNode(null);
 
-      if (isFocusMode) {
+      // 使用 ref 而非闭包中的 isFocusMode 读取最新值
+      if (isFocusModeRef.current) {
         // 焦点模式下：恢复焦点模式渲染，不清除背景淡化
         applyFocusMode(graphRef.current, SHEN_HASH);
       } else {
@@ -358,6 +397,7 @@ const ONAPrototype = ({ onNavigateToDrillDown }) => {
     if (!graphRef.current || destroyedRef.current) return;
     if (isFocusMode) {
       // 退出焦点模式 → 恢复全部
+      isFocusModeRef.current = false;
       setIsFocusMode(false);
       graphRef.current.setAutoPaint(false);
       graphRef.current.getNodes().forEach((node) => graphRef.current.clearItemStates(node));
@@ -369,6 +409,7 @@ const ONAPrototype = ({ onNavigateToDrillDown }) => {
       graphRef.current.paint();
     } else {
       // 进入焦点模式
+      isFocusModeRef.current = true;
       setIsFocusMode(true);
       applyFocusMode(graphRef.current, SHEN_HASH);
     }
@@ -510,7 +551,11 @@ const ONAPrototype = ({ onNavigateToDrillDown }) => {
           <div style={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
               <span style={{ width: 8, height: 8, borderRadius: '50%', background: '#FF4D4F', display: 'inline-block' }} />
-              <span style={{ color: '#aaa' }}>高流失风险</span>
+              <span style={{ color: '#aaa' }}>高风险</span>
+            </div>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+              <span style={{ width: 8, height: 8, borderRadius: '50%', background: '#FA8C16', display: 'inline-block' }} />
+              <span style={{ color: '#aaa' }}>中风险</span>
             </div>
             <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
               <span style={{ width: 8, height: 8, borderRadius: '50%', background: '#5B8FF9', display: 'inline-block' }} />

@@ -5,7 +5,7 @@ PDF 报告导出 —— FastAPI 路由
 生成《核心骨干离职风险留任建议书》PDF
 """
 
-import io, math
+import io, math, os
 from datetime import datetime, timezone
 from fastapi import APIRouter, HTTPException, status
 from fastapi.responses import StreamingResponse
@@ -25,6 +25,20 @@ try:
         HRFlowable,
     )
     from reportlab.lib import colors
+    from reportlab.pdfbase import pdfmetrics
+    from reportlab.pdfbase.ttfonts import TTFont
+
+    # 注册中文字体（Windows 微软雅黑）
+    _FONT_PATHS = [
+        "C:/Windows/Fonts/msyh.ttc",    # 微软雅黑常规
+        "C:/Windows/Fonts/msyhbd.ttc",  # 微软雅黑粗体
+    ]
+    _FONT_REGISTERED = False
+    for fp in _FONT_PATHS:
+        if os.path.exists(fp):
+            pdfmetrics.registerFont(TTFont("YaHei", fp))
+            _FONT_REGISTERED = True
+            break
     HAS_REPORTLAB = True
 except ImportError:
     HAS_REPORTLAB = False
@@ -65,10 +79,14 @@ async def export_report(employee_id_hash: str):
     doc = SimpleDocTemplate(buf, pagesize=A4, topMargin=20*mm, bottomMargin=15*mm)
     styles = getSampleStyleSheet()
 
-    title_style = ParagraphStyle("Title2", parent=styles["Heading1"], fontSize=18, spaceAfter=6*mm, textColor=HexColor("#1a1a2e"))
-    h2_style = ParagraphStyle("H2", parent=styles["Heading2"], fontSize=14, spaceBefore=8*mm, spaceAfter=4*mm, textColor=HexColor("#16213e"))
-    normal = ParagraphStyle("Normal", parent=styles["Normal"], fontSize=10, leading=14, spaceAfter=3*mm)
-    small = ParagraphStyle("Small", parent=styles["Normal"], fontSize=8, textColor=HexColor("#888888"))
+    # 中文内容使用 YaHei，西文/数字 fallback 到 Helvetica
+    _FONT = "YaHei" if _FONT_REGISTERED else "Helvetica"
+    _FONT_BOLD = "YaHei" if _FONT_REGISTERED else "Helvetica-Bold"
+
+    title_style = ParagraphStyle("Title2", parent=styles["Heading1"], fontSize=18, spaceAfter=6*mm, textColor=HexColor("#1a1a2e"), fontName=_FONT_BOLD)
+    h2_style = ParagraphStyle("H2", parent=styles["Heading2"], fontSize=14, spaceBefore=8*mm, spaceAfter=4*mm, textColor=HexColor("#16213e"), fontName=_FONT_BOLD)
+    normal = ParagraphStyle("Normal", parent=styles["Normal"], fontSize=10, leading=14, spaceAfter=3*mm, fontName=_FONT)
+    small = ParagraphStyle("Small", parent=styles["Normal"], fontSize=8, textColor=HexColor("#888888"), fontName=_FONT)
 
     elements = []
 
@@ -89,7 +107,7 @@ async def export_report(employee_id_hash: str):
     ]
     t = Table(info_data, colWidths=[70, 130, 70, 130])
     t.setStyle(TableStyle([
-        ("FONTNAME", (0, 0), (-1, 0), "Helvetica-Bold"),
+        ("FONTNAME", (0, 0), (-1, -1), _FONT),
         ("FONTSIZE", (0, 0), (-1, -1), 9),
         ("GRID", (0, 0), (-1, -1), 0.5, colors.grey),
         ("BACKGROUND", (0, 0), (0, -1), HexColor("#f5f5f5")),
@@ -118,7 +136,7 @@ async def export_report(employee_id_hash: str):
     ]
     t2 = Table(roi_data, colWidths=[100, 120, 120])
     t2.setStyle(TableStyle([
-        ("FONTNAME", (0, 0), (-1, 0), "Helvetica-Bold"),
+        ("FONTNAME", (0, 0), (-1, -1), _FONT),
         ("FONTSIZE", (0, 0), (-1, -1), 9),
         ("GRID", (0, 0), (-1, -1), 0.5, colors.grey),
         ("BACKGROUND", (0, 0), (-1, 0), HexColor("#1a1a2e")),
