@@ -86,12 +86,16 @@ turnover-prediction/
 │   ├── 001_ddl_schema.sql
 │   ├── 002_intervention_state_machine.sql
 │   └── 003_performance_indices.sql
-├── docs/                     # 架构文档（7 份）
+├── docs/                     # 文档（10 份）
+│   ├── product/              # 产品文档
+│   │   ├── cho_demo_script.md       # CHO 演示脚本
+│   │   └── product_roadmap.md       # 产品路线图
 │   ├── product_business_logic_whitepaper.md   # 算法白皮书
 │   ├── data_pipeline_and_dictionary_spec.md   # 数据字典
 │   ├── deployment_and_operations_manual.md    # 部署手册
 │   ├── architecture-white-paper.md
 │   ├── checkpoint_v0.2.0_manifest.md
+│   ├── checkpoint_v0.3.0_manifest.md
 │   ├── frontend-hover-spec.md
 │   └── ona-openapi-v1.md
 ├── calibration_sandbox.py   # 校准沙箱（4/4 断言通过）
