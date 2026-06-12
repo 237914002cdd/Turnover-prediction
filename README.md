@@ -1,122 +1,174 @@
 # 组织网络分析（ONA）与留任决策模拟平台
 
-**员工离职风险预测与管理平台** — 全栈原型（v0.3.0 · Demo-Ready）
+**员工离职风险预测与管理平台** · v0.3.0 · Demo-Ready
 
-从原始 HR 数据清洗到白盒化归因诊断，从 ROI 财务沙盘到 LLM 定制面谈剧本，提供完整的 **人机协同（Human-in-the-loop）离职风险预测与干预闭环**。
+> **不是另一个问卷平台。** 基于被动式组织网络分析（Passive ONA）的离职风险预测系统，为 HRBP 和 CHO 提供从"谁可能走"到"花多少钱留"的完整决策闭环。
+
+[![后端](https://img.shields.io/badge/status-ok-brightgreen)](http://localhost:8000/health)
+[![前端](https://img.shields.io/badge/frontend-200-brightgreen)](http://localhost:5175)
+[![文档](https://img.shields.io/badge/docs-15%20files-1890FF)](docs/)
 
 ---
 
-## 全栈架构
-
-```
-[HR 数据/CSV] → Data Cleaning Pipeline → 数仓(employee_static, ONA元数据)
-                                              ↓
-                                     ROI & ONA 计算引擎
-                                              ↓
-                   ┌─── 全局仪表盘(Top100 + 替换损失大屏)
-                   ├─── ONA 拓扑图(G6 力导向 · 焦点聚焦模式)
-                   ├─── 个体下钻诊断页(核心不满驱动因子矩阵 + ROI滑块)
-                   ├─── 干预状态机(NEW→IN_PROGRESS→RESOLVED/FP)
-                   └─── LLM 面谈剧本生成(Playbook Drawer)
-```
-
-## 项目规模
-
-| 层 | 语言 | 行数 |
-|----|------|------|
-| 后端 (API + 模型 + 路由 + 服务) | Python | 1,917 |
-| 前端 (React + G6 拓扑 + 下钻组件) | JSX / JS | 1,546 |
-| 算法引擎 (特征工程 + 清洗 + ROI) | Python | 739 |
-| 数据库 DDL (数仓 + 状态机 + 索引) | SQL | 417 |
-| 文档 (白皮书 + 数据字典 + 部署手册) | Markdown | 1,035 |
-| **总计** | | **5,903** |
-
-## 快速冷启动
+## 🚀 三秒冷启动
 
 ```bash
-# 后端
-cd api && pip install -r ../requirements.txt
+# 后端（FastAPI）
+cd api
 python -m uvicorn api.main:app --host 0.0.0.0 --port 8000
 
-# 前端
-cd frontend && npm install
+# 前端（React + Vite）
+cd frontend
 npm run dev -- --port 5175
 ```
 
-## API 端点
+浏览器打开 `http://localhost:5175`，即可看到拓扑图谱。
 
-| 方法 | 路径 | 说明 |
+---
+
+## 🧭 差异化定位
+
+在 Workday Peakon / Visier / Glint / Culture Amp 四家巨头的竞争格局中，Turnover ONA 开辟了一个新品类：
+
+| 维度 | 传统平台 | Turnover ONA |
+|------|---------|-------------|
+| 数据来源 | 员工主动填写问卷（Pulse Survey） | 被动分析协作日志元数据 |
+| 核心洞察 | "谁不满意"（eNPS / 敬业度分数） | "谁是枢纽"（Eigenvector Centrality 0.96） |
+| 归因粒度 | 群体级因子分析 | **个体级 SHAP 归因**（每人 Top 3 因子不同） |
+| 财务语言 | "敬业度提升了 3 分" | **"调薪 10% → 净节约 ¥2,520"** |
+| 员工负担 | 每周 3–5 分钟填问卷，响应率 30%→衰减 | **零负担**——不需任何操作 |
+| 组织盲区 | 看不到非正式网络 | ONA 拓扑识别隐性权力中心 |
+
+> 📄 详细分析见 [竞品分析报告](docs/product/competitive_analysis.md)
+
+---
+
+## 📐 系统架构
+
+```
+[HR 数据/CSV] → SHA-256 脱敏管道 → turnover.db (SQLite)
+                                        ↓
+                                ONA + SHAP 引擎
+                                        ↓
+            ┌─── 全局预警仪表盘（总期望替换损失 ¥200,064）
+            ├─── ONA 拓扑图谱（AntV G6 · 焦点聚焦 · 60fps）
+            ├─── 个体诊断面板（8 项 SHAP 因子 · 瀑布图）
+            ├─── ROI 沙盘模拟器（滑块联动 · 100ms 节流 · 实时重算）
+            ├─── PDF 留任建议书（归因 + ROI + 级联风险）
+            └─── LLM 面谈剧本生成（Playbook Drawer）
+```
+
+### 核心数学模型
+
+| 公式 | 说明 |
+|------|------|
+| `Score = P_base × Centrality_ONA × W_perf` | 综合风险排序 |
+| `P_new = P_base × e^(-α × X)` | 调薪后离职概率指数衰减 |
+| `Net_Savings = Pre_Cost - Post_Cost - Invest_Cost` | ROI 净节约金额 |
+
+---
+
+## 📊 端到端数据契约
+
+| 前端组件 | 后端端点 | 响应模型 | 数据流向 |
+|---------|---------|---------|---------|
+| **Dashboard**（顶部预警看板） | `GET /` | 自有聚合 | 组件内聚合 |
+| **ONA Topology**（G6 拓扑图谱） | `POST /api/v1/ona/graph/subgraph` | `SubgraphResponse` | 中心节点 → G6 Graph |
+| **HoverTooltip**（悬停弹窗） | `POST /api/v1/ona/node/hover_details` | `ONAHoverResponse` | 节点 → 浮动弹窗 |
+| **EmployeeDrillDown**（诊断面板） | `GET /api/v1/employee/{id}/diagnostic` | `DiagnosticResponse` | 员工 → 归因瀑布图 |
+| **ROISimulator**（沙盘推演） | `POST /api/v1/roi/simulate` | `RoiSimulationResponse` | 滑块值 → 实时重算 |
+| **DataUploadModal**（数据导入） | `POST /api/v1/ona/graph/upload` | `OnaImportResponse` | File → 导入结果 |
+| **PDF Export**（报告导出） | `GET /api/v1/ona/report/{id}` | `StreamingResponse` (PDF) | 员工 → PDF 决策报告 |
+| **PlaybookDrawer**（面谈剧本） | `POST /api/v1/ona/playbook/generate` | `PlaybookGenerateResponse` | 员工 → LLM 剧本 |
+
+### 全部 API 端点
+
+| 方法 | 路径 | 说明 | PRD 参考 |
+|------|------|------|---------|
+| `GET` | `/health` | 健康检查 | — |
+| `POST` | `/api/v1/ona/node/hover_details` | 节点悬停详情 | PRD F2 |
+| `POST` | `/api/v1/ona/intervention/create` | 创建干预记录（状态机） | PRD F5 |
+| `POST` | `/api/v1/roi/simulate` | ROI 实时模拟测算 | PRD F3 |
+| `POST` | `/api/v1/ona/playbook/generate` | LLM 面谈剧本生成 | PRD F6 |
+| `GET` | `/api/v1/ona/graph/subgraph` | Ego Network 子图 | PRD F1 |
+| `GET` | `/api/v1/ona/graph/topology` | 全局拓扑图（Top 100 Hub） | PRD F1 |
+| `GET` | `/api/v1/employee/{id}/diagnostic` | 39 字段档案 + SHAP 归因矩阵 | PRD F2 |
+| `POST` | `/api/v1/ona/graph/upload` | CSV/Excel 批量导入 | PRD F4 |
+| `GET` | `/api/v1/ona/report/{id}` | 导出留任建议书 PDF | PRD F3 |
+
+---
+
+## 📦 项目规模
+
+| 层 | 语言 | 行数 |
+|----|------|------|
+| 后端（API + 模型 + 路由 + 服务） | Python | 1,917+ |
+| 前端（React + G6 拓扑 + 下钻组件） | JSX / JS | 1,546+ |
+| 算法引擎（特征工程 + 清洗 + ROI） | Python | 739 |
+| 数据库 DDL（数仓 + 状态机 + 索引） | SQL | 417 |
+| **文档**（详见下方） | Markdown | **2,613** |
+| **总计** | | **~7,232** |
+
+---
+
+## 📚 文档全景（15 份 · 2,613 行）
+
+### 产品与商业文档（7 份 · 1,515 行）
+
+| 文档 | 行数 | 内容 | 状态 |
+|------|------|------|------|
+| [产品路线图](docs/product/product_roadmap.md) | 127 | 迭代计划、里程碑、版本边界 | ✅ |
+| [竞品分析报告](docs/product/competitive_analysis.md) | 232 | Workday Peakon / Visier / Glint / Culture Amp 对比 | ✅ |
+| [用户画像](docs/product/user_personas.md) | 214 | HRBP + CHO 深度场景分析 + User Story Mapping | ✅ |
+| [PRD v0.3.0](docs/product/prd_v0.3.md) | 443 | 6 功能验收标准 + 数据契约 + Schema 对齐 | ✅ |
+| [定价策略](docs/product/pricing_strategy.md) | 146 | SaaS 订阅 + 私有部署买断双轨制 | ✅ |
+| [企业实施指南](docs/product/implementation_guide.md) | 199 | 冷启动 + SHA-256 脱敏合规 + 变革管理 | ✅ |
+| [CHO 演示脚本](docs/product/cho_demo_script.md) | 154 | 面向 CH0 的 15 分钟演示话术 | ✅ |
+
+### 技术文档（8 份 · 1,611 行）
+
+| 文档 | 行数 | 内容 |
 |------|------|------|
-| `GET` | `/health` | 健康检查 |
-| `GET` | `/api/v1/employee/diagnostic/{id}` | 39 字段档案 + 归因矩阵 |
-| `GET` | `/api/v1/ona/graph/topology` | 全局拓扑图（Top 100 Hub） |
-| `GET` | `/api/v1/ona/graph/subgraph` | Ego Network 子图 |
-| `POST` | `/api/v1/ona/node/hover_details` | 节点悬停详情 150ms |
-| `POST` | `/api/v1/ona/intervention/create` | 创建干预（状态机） |
-| `POST` | `/api/v1/roi/simulate` | ROI 实时模拟测算 |
-| `POST` | `/api/v1/ona/playbook/generate` | LLM 面谈剧本生成 |
-| `POST` | `/api/v1/ona/graph/upload` | CSV/Excel 批量导入员工数据 |
-| `GET` | `/api/v1/ona/report/{id}` | 导出留任建议书 PDF |
+| 算法白皮书 | 164 | 业务逻辑与模型设计 |
+| 数据字典 | 184 | 39 字段定义与血源 |
+| 架构白皮书 | 137 | 系统架构与设计决策 |
+| 部署手册 | 213 | 私有部署与运维 |
+| OpenAPI 规范 | 183 | 接口规范与交互协议 |
+| 前端 Hover 规范 | 111 | 悬停弹窗交互规格 |
+| v0.2.0 基线 | 43 | 版本基线 |
+| v0.3.0 基线 | 63 | 版本基线 |
 
-## 核心数学模型
+> 全部文档见 [docs/](docs/)
 
-- **综合风险排序**: `Score = P_base × Centrality_ONA × W_perf`
-- **调薪后离职率**: `P_new = P_base × e^(-α × X)`
-- **净节约金额**: `Net_Savings = Pre_Cost - Post_Cost - Invest_Cost`
+---
 
-## 项目结构
+## 🛡️ 数据安全与合规
 
-```
-turnover-prediction/
-├── api/                     # FastAPI 后端（6 routers, 10 endpoints）
-│   ├── routers/             # diagnostic, onahover, playbook, roi, subgraph
-│   ├── models/ona_models.py # Pydantic 数据模型（含业务翻译层字段）
-│   ├── services/            # db.py（SQLite 连接）+ interpretation.py（业务翻译）
-│   └── main.py
-├── frontend/                # React + Vite + AntV G6
-│   ├── src/components/      # OnaTopology（焦点聚焦）+ EmployeeDrillDown（ROI沙盘）
-│   ├── src/api/ona.js       # Axios 网络层
-│   ├── src/mock/            # employeeRegistry.js（统一数据源）
-│   └── package.json
-├── python/                  # 算法引擎
-│   ├── build_ona_feature_engineering_pipeline.py  # 6 维特征工程
-│   ├── data_cleaning_pipeline.py                  # 4 步清洗管道
-│   └── roi_ona_engine.py                          # ROI 测算 + 风险等级
-├── sql/                     # PostgreSQL DDL
-│   ├── 001_ddl_schema.sql
-│   ├── 002_intervention_state_machine.sql
-│   └── 003_performance_indices.sql
-├── docs/                     # 文档（11 份 · 1,611 行）
-│   ├── product/              # 产品文档（3 份）
-│   │   ├── cho_demo_script.md       # CHO 演示脚本
-│   │   ├── competitive_analysis.md # 竞品分析报告
-│   │   └── product_roadmap.md       # 产品路线图
-│   ├── product_business_logic_whitepaper.md   # 算法白皮书
-│   ├── data_pipeline_and_dictionary_spec.md   # 数据字典
-│   ├── deployment_and_operations_manual.md    # 部署手册
-│   ├── architecture-white-paper.md
-│   ├── checkpoint_v0.2.0_manifest.md
-│   ├── checkpoint_v0.3.0_manifest.md
-│   ├── frontend-hover-spec.md
-│   └── ona-openapi-v1.md
-├── calibration_sandbox.py   # 校准沙箱（4/4 断言通过）
-└── requirements.txt
-```
+系统遵循 **Privacy by Design** 原则——**绝不触碰员工聊天正文，仅处理元数据**。
 
-## Git 版本历史
+- **SHA-256 局部哈希脱敏**: 所有个人标识在进入系统前完成不可逆脱敏
+- **Content 物理隔离**: 不采集、不传输、不存储任何消息正文
+- **数据最小化**: 仅采集实现预测必需的 39 字段
+- **数据驻地**: SaaS 版可指定云 Region，私有版完全位于客户基础设施内
 
-```
-c1bc582 fix: preserve focus mode on mouseleave
-a313f9c feat: default focus mode (SHEN_HASH 1-degree neighbors)
-7108b19 fix: HR terminology replacement
-f235416 refactor: unified EMPLOYEE_REGISTRY, ROI formulas, reactive top bar
-7903845 docs: product whitepaper, data dictionary, deployment manual
-2fb7f0c release: v0.2.0 - full data pipeline + sqlite integration
-```
+> 📄 详见 [企业实施指南](docs/product/implementation_guide.md) 第 2 章
 
-## 技术栈
+---
 
-- **后端**: Python 3.10+, FastAPI, Pydantic, Pandas, Uvicorn
-- **前端**: React 18, Vite, G6 (AntV), Axios, Lodash
-- **数据库**: PostgreSQL (DDL + Recursive CTE) / SQLite (dev)
-- **算法**: SHAP 归因, 指数衰减模型, 3σ Winsorization
+## 🧩 技术栈
+
+| 层 | 技术 |
+|----|------|
+| **后端** | Python 3.10+, FastAPI, Pydantic v2, Uvicorn |
+| **前端** | React 18, Vite, AntV G6 (WebGL), Axios, Lodash |
+| **算法** | SHAP 归因, Logistic 指数衰减, Eigenvector Centrality |
+| **数据库** | SQLite (dev) / PostgreSQL (prod) |
+| **报告** | ReportLab (PDF 生成) |
+| **AI** | LLM Playbook (面谈剧本生成) |
+
+---
+
+## 📄 许可证
+
+**员工离职风险预测与管理平台** © 2026  
+内部项目 · 未公开发布
