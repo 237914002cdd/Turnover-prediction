@@ -144,9 +144,9 @@ async def upload_file(file: UploadFile = File(...)):
 
     try:
         if suffix == ".csv":
-            df = pd.read_csv(io.BytesIO(content))
+            df = pd.read_csv(io.BytesIO(content), skiprows=1)
         else:
-            df = pd.read_excel(io.BytesIO(content))
+            df = pd.read_excel(io.BytesIO(content), skiprows=1)
     except Exception as e:
         raise HTTPException(status_code=400, detail=f"文件解析失败: {e}")
 
