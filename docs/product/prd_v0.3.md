@@ -419,9 +419,14 @@ turnover-prediction/
 │   └── api/ona.js                 # API 调用层
 ├── docs/
 │   ├── product/
-│   │   ├── competitive_analysis.md
-│   │   ├── user_personas.md       # ← 本文件
-│   │   └── product_roadmap.md
+│   │   ├── competitive_analysis.md   # 竞品分析
+│   │   ├── user_personas.md          # 用户画像
+│   │   ├── product_roadmap.md        # 产品路线图
+│   │   ├── cho_demo_script.md        # CHO 演示脚本
+│   │   ├── pricing_strategy.md       # 定价策略
+│   │   ├── implementation_guide.md   # 实施指南
+│   │   ├── data_import_spec.md       # 数据导入规范
+│   │   └── import_field_mapping.md   # 字段中英文对照表
 │   └── ... （技术文档 8 份）
 └── turnover.db                    # SQLite 数据库
 ```
