@@ -58,6 +58,12 @@ const DataUploadModal = ({ onClose }) => {
           <input ref={fileRef} type="file" accept=".csv,.xlsx" onChange={handleFileChange} style={{ display: 'none' }} />
         </div>
 
+        {/* 模板下载 */}
+        <a href="/template_import.xlsx" download
+          style={{ display: 'block', textAlign: 'center', fontSize: 12, color: '#1890FF', marginBottom: 12, cursor: 'pointer', textDecoration: 'none' }}>
+          📥 下载导入模板
+        </a>
+
         {/* 上传按钮 */}
         <button onClick={handleUpload} disabled={!file || uploading}
           style={{ width: '100%', padding: '10px 0', borderRadius: 8, fontSize: 13, fontWeight: 600, cursor: (!file || uploading) ? 'not-allowed' : 'pointer', border: 'none',
