@@ -106,14 +106,14 @@ npm run dev -- --port 5175
 | 前端（React + G6 拓扑 + 下钻组件） | JSX / JS | 1,546+ |
 | 算法引擎（特征工程 + 清洗 + ROI） | Python | 739 |
 | 数据库 DDL（数仓 + 状态机 + 索引） | SQL | 417 |
-| **文档**（详见下方） | Markdown | **2,613** |
-| **总计** | | **~7,232** |
+| **文档**（详见下方） | Markdown | **2,740** |
+| **总计** | | **~7,359** |
 
 ---
 
-## 📚 文档全景（15 份 · 2,613 行）
+## 📚 文档全景（17 份 · 2,740 行）
 
-### 产品与商业文档（7 份 · 1,515 行）
+### 产品与商业文档（9 份 · 1,642 行）
 
 | 文档 | 行数 | 内容 | 状态 |
 |------|------|------|------|
@@ -123,6 +123,8 @@ npm run dev -- --port 5175
 | [PRD v0.3.0](docs/product/prd_v0.3.md) | 443 | 6 功能验收标准 + 数据契约 + Schema 对齐 | ✅ |
 | [定价策略](docs/product/pricing_strategy.md) | 146 | SaaS 订阅 + 私有部署买断双轨制 | ✅ |
 | [企业实施指南](docs/product/implementation_guide.md) | 199 | 冷启动 + SHA-256 脱敏合规 + 变革管理 | ✅ |
+| [数据导入规范](docs/product/data_import_spec.md) | 76 | 双行表头模板 + HR 填写说明 | ✅ |
+| [字段中英文对照表](docs/product/import_field_mapping.md) | 51 | 18 字段中英文映射 + 可选值 | ✅ |
 | [CHO 演示脚本](docs/product/cho_demo_script.md) | 154 | 面向 CH0 的 15 分钟演示话术 | ✅ |
 
 ### 技术文档（8 份 · 1,611 行）
