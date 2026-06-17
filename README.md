@@ -2,7 +2,7 @@
 
 **员工离职风险预测与管理平台** · v0.3.0 · Demo-Ready
 
-![全量拓扑与预警看板](/screenshots/01-overview.png)
+![全量拓扑与预警看板](screenshots/01-overview.png)
 
 > **不是另一个问卷平台。** 基于被动式组织网络分析（Passive ONA）的离职风险预测系统，为 HRBP 和 CHO 提供从"谁可能走"到"花多少钱留"的完整决策闭环。
 
@@ -43,8 +43,8 @@ npm run dev -- --port 5175
 
 > 📄 详细分析见 [竞品分析报告](docs/product/competitive_analysis.md)
 
-![焦点聚焦模式 · 快速定位高危枢纽](/screenshots/02-focus-mode.png)
-![悬停弹窗 · SHAP 因子归因与级联风险](/screenshots/03-hover-detail.png)
+![焦点聚焦模式 · 快速定位高危枢纽](screenshots/02-focus-mode.png)
+![悬停弹窗 · SHAP 因子归因与级联风险](screenshots/03-hover-detail.png)
 
 ---
 
@@ -71,7 +71,7 @@ npm run dev -- --port 5175
 | `P_new = P_base × e^(-α × X)` | 调薪后离职概率指数衰减 |
 | `Net_Savings = Pre_Cost - Post_Cost - Invest_Cost` | ROI 净节约金额 |
 
-![诊断面板与 ROI 沙盘推演](/screenshots/04-drilldown-roi.png)
+![诊断面板与 ROI 沙盘推演](screenshots/04-drilldown-roi.png)
 
 ---
 
@@ -149,8 +149,8 @@ npm run dev -- --port 5175
 
 > 全部文档见 [docs/](docs/)
 
-![PDF 留任建议书](/screenshots/05-report.png)
-![数据导入弹窗与模板下载](/screenshots/06-import.png)
+![PDF 留任建议书](screenshots/05-report.png)
+![数据导入弹窗与模板下载](screenshots/06-import.png)
 
 ---
 
