@@ -3,6 +3,7 @@
 **员工离职风险预测与管理平台** · v0.3.0 · Demo-Ready
 
 ![全量拓扑与预警看板](screenshots/01-overview.png)
+*① ONA 全局力导向拓扑图谱（AntV G6 · 100 节点） · ② 高风险人才总期望替换损失 ¥200,064 看板 · ③ 预警概览（高危 15 / 中危 37 / 全员 100） · ④ 风险-绩效九宫格 · ⑤ 组织稳定度控制中心（搜索 + 筛选 + 图例）*
 
 > **不是另一个问卷平台。** 基于被动式组织网络分析（Passive ONA）的离职风险预测系统，为 HRBP 和 CHO 提供从"谁可能走"到"花多少钱留"的完整决策闭环。
 
@@ -44,7 +45,10 @@ npm run dev -- --port 5175
 > 📄 详细分析见 [竞品分析报告](docs/product/competitive_analysis.md)
 
 ![焦点聚焦模式 · 快速定位高危枢纽](screenshots/02-focus-mode.png)
+*高亮申鹏程（Eigenvector Centrality 0.96）及其一度邻居，非目标子图透明度降至 0.1，一步识别隐性权力中枢*
+
 ![悬停弹窗 · SHAP 因子归因与级联风险](screenshots/03-hover-detail.png)
+*悬停任意节点弹出详细诊断：离职概率、组织核心影响力、Top 3 核心不满驱动因子、潜在团队流失放大效应*
 
 ---
 
@@ -72,6 +76,7 @@ npm run dev -- --port 5175
 | `Net_Savings = Pre_Cost - Post_Cost - Invest_Cost` | ROI 净节约金额 |
 
 ![诊断面板与 ROI 沙盘推演](screenshots/04-drilldown-roi.png)
+*左侧：8 项 SHAP 归因因子降序瀑布图（薪资增幅+16.3% / 任现职年限+14.1% / 加班超载+13.0%）· 右侧：调薪滑块联动 ROI 沙盘，实时计算净节约金额 · 多重干预手段叠加效果 · 一键导出 PDF 留任建议书*
 
 ---
 
@@ -150,7 +155,10 @@ npm run dev -- --port 5175
 > 全部文档见 [docs/](docs/)
 
 ![PDF 留任建议书](screenshots/05-report.png)
+*自动生成《核心骨干离职风险留任建议书》：员工基本画像 → 调薪留任 ROI 沙盘推演（拟调薪 12%）→ 组织网络连带风险 · 含时间戳与保密声明*
+
 ![数据导入弹窗与模板下载](screenshots/06-import.png)
+*双行表头 Excel 模板（第 1 行中文引导 + 第 2 行英文列名）· 支持 .csv / .xlsx 格式 · 批量导入后显示总行数、成功插入数、跳过/错误计数*
 
 ---
 
